@@ -1,0 +1,138 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt  #importing required libraries
+
+from google.colab import drive
+drive.mount('/content/drive')    #mounting google drive
+
+data = pd.read_csv('/content/drive/MyDrive/breast-cancer.csv')
+
+data.head()  #first five objects
+
+data
+
+data.info
+
+data.describe()  #statistical analysis of the data
+
+data.corr()  #getting the correlation between features
+
+data.isnull().sum() #returns True if any null value exist
+
+data.dropna()   #drops null values
+
+sns.heatmap(data.isnull(), yticklabels=False, cbar=False)  #plot to show null values if any
+
+sns.heatmap(data.corr())  #plot showing correlation between all features
+
+sns.pairplot(data)
+
+def convert(s):     #Converting chategorical data type to numerical data type
+ # s = s.lower()
+  if s == 'M':
+    return 1
+  elif s == 'B':
+    return -1
+
+new_data = pd.read_csv('/content/drive/MyDrive/breast-cancer.csv',converters={'diagnosis':convert})
+
+sns.countplot(x=new_data['diagnosis'])
+
+new_data['diagnosis'].unique()
+
+X = new_data[['radius_mean','texture_mean','perimeter_mean','area_mean','smoothness_mean','compactness_mean','concavity_mean','concave points_mean','radius_worst','texture_worst','perimeter_worst','area_worst','smoothness_worst','compactness_worst','concavity_worst','concave points_worst','symmetry_worst','fractal_dimension_worst']]
+y = new_data[['diagnosis']]
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+from sklearn.svm import SVC
+SVM_classifier = SVC(kernel='linear')
+SVM_classifier.fit(X_train, y_train)
+
+y_predictions = SVM_classifier.predict(X_test)
+
+y_predictions
+
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+cm = confusion_matrix(y_test, y_predictions)
+cm
+
+print("Accuracy:",accuracy_score(y_test, y_predictions))
+
+print(classification_report(y_test, y_predictions))
+
+X_train, X_test, y_train, y_test = train_test_split(X,y,random_state=42,test_size=0.3)
+
+from sklearn.naive_bayes import GaussianNB
+classifier = GaussianNB()
+classifier.fit(X_train,y_train)
+
+y_pred = classifier.predict(X_test)
+y_pred
+
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test,y_pred)
+cm
+
+from sklearn.metrics import accuracy_score
+print(accuracy_score(y_test,y_pred))
+
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+x_train_normalized = scaler.fit_transform(X_train)
+x_test_normalized = scaler.transform(X_test)
+
+print("x_train: \n", x_train_normalized, "\n")
+print("np.shape(x_train): ", np.shape(x_train_normalized), "\n")
+
+print("x_test_normalized: \n", x_test_normalized, "\n")
+print("np.shape(x_test_normalized): ", np.shape(x_test_normalized), "\n")
+
+from sklearn.svm import SVC
+svm_classifier = SVC(C=7.0, kernel = 'linear')
+print("SVM Classifier: \n", svm_classifier,"\n")
+
+svm_classifier.fit(x_train_normalized, y_train)
+
+print("Printing the support vectors \n\n", svm_classifier.support_vectors_, "\n")
+print("Number of support vectors: ", np.shape(svm_classifier.support_vectors_)[0], "\n")
+
+print("Number of support vectors for each class: ", svm_classifier.n_support_)
+print("Intercept values: ", svm_classifier.intercept_)
+
+svm_train_predictions = svm_classifier.predict(x_train_normalized)
+print("Predictions: \n", svm_train_predictions)
+
+print("Predictions \t Ground Truth: \n\n", np.column_stack((svm_train_predictions, y_train)))
+
+training_accuracy = svm_classifier.score(x_train_normalized, y_train)
+print("Classifier Accuracy:: ", training_accuracy*100, "\n")
+
+from sklearn.metrics import confusion_matrix
+train_cm = confusion_matrix(y_train, svm_train_predictions)
+
+print("Confusion Matrix: \n\n", train_cm, "\n")
+
+import seaborn as sn
+sn.heatmap(train_cm, annot=True,cmap="OrRd")
+
+svm_test_predictions = svm_classifier.predict(x_test_normalized)
+print("Predictions: \n", svm_test_predictions)
+
+print("Predictions \t Ground Truth: \n\n", np.column_stack((svm_test_predictions, y_test)))
+
+from sklearn.metrics import classification_report
+print(classification_report(y_test,svm_test_predictions))
+
+from sklearn.svm import SVC
+svm_classifier = SVC(C=7.0, kernel = 'sigmoid')
+print("SVM Classifier: \n", svm_classifier,"\n")
